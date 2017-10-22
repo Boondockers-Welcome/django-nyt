@@ -278,6 +278,13 @@ class Command(BaseCommand):
                 send_emails=True,
                 latest__is_emailed=False
             ):
-                context['notifications'].append(subscription.latest)
+                for notification in models.Notification.objects.filter(
+                    subscription=subscription, user=None, is_emailed=False
+                ):
+                    context['notifications'].append(notification)
+                for notification in models.Notification.objects.filter(
+                    subscription=subscription, user=setting.user, is_emailed=False
+                ):
+                    context['notifications'].append(notification)
 
             self._send_batch(context, connection, setting)
