@@ -127,14 +127,11 @@ class Settings(models.Model):
             ).exclude(pk=self.pk)
             default_settings.update(is_default=False)
         else:
-            non_default_settings = Settings.objects.filter(
+            default_settings = Settings.objects.filter(
                 user=self.user,
-                is_default=False,
-            ).exclude(pk=self.pk)
-            if non_default_settings.exists():
-                non_default_settings[0].is_default = True
-                non_default_settings[0].save()
-            else:
+                is_default=True,
+            )
+            if not default_settings.exists():
                 raise ValueError("A user must have a default settings object")
         super(Settings, self).save(*args, **kwargs)
 
