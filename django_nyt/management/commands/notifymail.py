@@ -109,6 +109,7 @@ class Command(BaseCommand):
         options.setdefault('daemon', False)
         options.setdefault('cron_interval', None)
         options.setdefault('no_sys_exit', False)
+        options.setdefault('log', None)
 
         self.options = options
 
@@ -122,10 +123,11 @@ class Command(BaseCommand):
         self.logger = logging.getLogger('django_nyt')
 
         if not self.logger.handlers:
-            if daemon:
+            if options['log']:
                 handler = logging.FileHandler(filename=options['log'])
             else:
                 handler = logging.StreamHandler(self.stdout)
+            handler.setFormatter(logging.Formatter("%(asctime)s : %(message)s"))
             self.logger.addHandler(handler)
             self.logger.setLevel(logging.INFO)
 
@@ -149,8 +151,8 @@ class Command(BaseCommand):
         if cron_interval:
             interval_names = [y[1] for y in nyt_settings.INTERVALS]
             try:
-                interval_val = interval_names.index(cron_interval)
-                user_settings = models.Settings.objects.filter(interval=interval_val)
+                idx = interval_names.index(cron_interval)
+                user_settings = models.Settings.objects.filter(interval=nyt_settings.INTERVALS[idx][0])
                 if user_settings:
                     self.send_mails(connection, user_settings)
                 return
