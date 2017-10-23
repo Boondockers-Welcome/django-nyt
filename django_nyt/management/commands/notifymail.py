@@ -38,9 +38,9 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--cron', '-c',
-            action='store_true',
-            dest='cron',
-            help='Do not loop, just send out emails once and exit'
+            action='store',
+            dest='cron_interval',
+            help='Run as cron and indicate interval (daily, weekly, etc.)',
         )
         parser.add_argument(
             '--pid-file',
@@ -107,15 +107,15 @@ class Command(BaseCommand):
         activate(settings.LANGUAGE_CODE)
 
         options.setdefault('daemon', False)
-        options.setdefault('cron', False)
+        options.setdefault('cron_interval', None)
         options.setdefault('no_sys_exit', False)
 
         self.options = options
 
         daemon = options['daemon']
-        cron = options['cron']
+        cron_interval = options['cron_interval']
 
-        assert not (daemon and cron), (
+        assert not (daemon and cron_interval), (
             "You cannot both choose cron and daemon options"
         )
 
@@ -146,9 +146,17 @@ class Command(BaseCommand):
             self.logger.error("Could get a mail connection")
             raise
 
-        if cron:
-            self.send_mails(connection)
-            return
+        if cron_interval:
+            interval_names = [y[1] for y in nyt_settings.INTERVALS]
+            try:
+                interval_val = interval_names.index(cron_interval)
+                user_settings = models.Settings.objects.filter(interval=interval_val)
+                if user_settings:
+                    self.send_mails(connection, user_settings)
+                return
+            except ValueError:
+                print("Invalid cron interval - no match for %s" % cron_interval)
+                sys.exit()
 
         if not daemon:
             print("Entering send-loop, CTRL+C to exit")
