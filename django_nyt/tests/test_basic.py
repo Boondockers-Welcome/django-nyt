@@ -2,12 +2,14 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.test.utils import override_settings
 
 from django_nyt import utils, models
 
 User = get_user_model()
 
 
+@override_settings(SITE_ID=1)
 class NotifyTestBase(TestCase):
 
     def setUp(self):
@@ -16,9 +18,9 @@ class NotifyTestBase(TestCase):
 
         # These two users are created by migrations in testproject.testapp
         # Reason is to make the testproject easy to setup and use.
-        self.user1 = User.objects.get(username='alice')
+        self.user1 = User.objects.get_or_create(username='alice')[0]
         self.user1_settings = models.Settings.get_default_setting(self.user1)
-        self.user2 = User.objects.get(username='bob')
+        self.user2 = User.objects.get_or_create(username='bob')[0]
         self.user2_settings = models.Settings.get_default_setting(self.user2)
 
     def tearDown(self):

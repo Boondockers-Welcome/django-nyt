@@ -21,13 +21,13 @@ class CommandTest(NotifyTestBase):
         utils.subscribe(self.user1_settings, self.TEST_KEY)
         utils.notify("This notification goes out by mail!", self.TEST_KEY)
 
-        call_command("notifymail", cron=True)
+        call_command("notifymail", cron='instantly')
 
         # No un-mailed notifications can be left!
         self.assertEqual(models.Notification.objects.filter(is_emailed=False).count(), 0)
 
         # Test that calling it again works but nothing gets sent
-        call_command("notifymail", cron=True)
+        call_command("notifymail", cron='instantly')
 
         # Now try the daemon
         pid_file = NamedTemporaryFile(delete=False)

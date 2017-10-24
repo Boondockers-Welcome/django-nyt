@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_delete, post_save
+from django.core.cache import cache
 from django.dispatch import receiver
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -54,20 +55,20 @@ class NotificationType(models.Model):
 
     @classmethod
     def get_by_key(cls, key, content_type=None):
-        if key in _notification_type_cache:
-            return _notification_type_cache[key]
+        nt = cache.get(key)
+        if nt is not None:
+            return nt
         try:
             nt = cls.objects.get(key=key)
         except cls.DoesNotExist:
             nt = cls.objects.create(key=key, content_type=content_type)
-        _notification_type_cache[key] = nt
+        cache.set(key, nt, None)
         return nt
 
 
 @receiver([post_save, post_delete], sender=NotificationType)
-def clear_notification_type_cache(*args, **kwargs):
-    global _notification_type_cache
-    _notification_type_cache = {}
+def clear_notification_type_cache(sender, instance, *args, **kwargs):
+    cache.set(instance.key, None)
 
 
 @python_2_unicode_compatible
