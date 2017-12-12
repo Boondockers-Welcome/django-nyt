@@ -10,11 +10,13 @@ from django_nyt import settings
 class SettingsAdmin(admin.ModelAdmin):
     raw_id_fields = ('user',)
     list_display = ('user', 'interval',)
+    search_fields = ['user__username']
 
 
 class SubscriptionAdmin(admin.ModelAdmin):
     raw_id_fields = ('settings',)
     list_display = ('display_user', 'notification_type', 'display_interval',)
+    search_fields = ['settings__user__username']
 
     def display_user(self, instance):
         return instance.settings.user
