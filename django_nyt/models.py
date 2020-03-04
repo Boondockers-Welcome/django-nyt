@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.signals import post_delete
 from django.db.models.signals import post_save
+from django.core.cache import cache
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
@@ -50,20 +51,20 @@ class NotificationType(models.Model):
 
     @classmethod
     def get_by_key(cls, key, content_type=None):
-        if key in _notification_type_cache:
-            return _notification_type_cache[key]
+        nt = cache.get(key)
+        if nt is not None:
+            return nt
         try:
             nt = cls.objects.get(key=key)
         except cls.DoesNotExist:
             nt = cls.objects.create(key=key, content_type=content_type)
-        _notification_type_cache[key] = nt
+        cache.set(key, nt, None)
         return nt
 
 
 @receiver([post_save, post_delete], sender=NotificationType)
-def clear_notification_type_cache(*args, **kwargs):
-    global _notification_type_cache
-    _notification_type_cache = {}
+def clear_notification_type_cache(sender, instance, *args, **kwargs):
+    cache.set(instance.key, None)
 
 
 class Settings(models.Model):
@@ -122,14 +123,11 @@ class Settings(models.Model):
             ).exclude(pk=self.pk)
             default_settings.update(is_default=False)
         else:
-            non_default_settings = Settings.objects.filter(
+            default_settings = Settings.objects.filter(
                 user=self.user,
-                is_default=False,
-            ).exclude(pk=self.pk)
-            if non_default_settings.exists():
-                non_default_settings[0].is_default = True
-                non_default_settings[0].save()
-            else:
+                is_default=True,
+            )
+            if not default_settings.exists():
                 raise ValueError("A user must have a default settings object")
         super(Settings, self).save(*args, **kwargs)
 

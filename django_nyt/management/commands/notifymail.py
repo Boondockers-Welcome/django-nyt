@@ -38,9 +38,9 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             '--cron', '-c',
-            action='store_true',
-            dest='cron',
-            help='Do not loop, just send out emails once and exit'
+            action='store',
+            dest='cron_interval',
+            help='Run as cron and indicate interval (daily, weekly, etc.)',
         )
         parser.add_argument(
             '--pid-file',
@@ -106,25 +106,27 @@ class Command(BaseCommand):
         activate(settings.LANGUAGE_CODE)
 
         options.setdefault('daemon', False)
-        options.setdefault('cron', False)
+        options.setdefault('cron_interval', None)
         options.setdefault('no_sys_exit', False)
+        options.setdefault('log', None)
 
         self.options = options
 
         daemon = options['daemon']
-        cron = options['cron']
+        cron_interval = options['cron_interval']
 
-        assert not (daemon and cron), (
+        assert not (daemon and cron_interval), (
             "You cannot both choose cron and daemon options"
         )
 
         self.logger = logging.getLogger('django_nyt')
 
         if not self.logger.handlers:
-            if daemon:
+            if options['log']:
                 handler = logging.FileHandler(filename=options['log'])
             else:
                 handler = logging.StreamHandler(self.stdout)
+            handler.setFormatter(logging.Formatter("%(asctime)s : %(message)s"))
             self.logger.addHandler(handler)
             self.logger.setLevel(logging.INFO)
 
@@ -141,9 +143,17 @@ class Command(BaseCommand):
         # create a connection to smtp server for reuse
         connection = mail.get_connection()
 
-        if cron:
-            self.send_mails(connection)
-            return
+        if cron_interval:
+            interval_names = [y[1] for y in nyt_settings.INTERVALS]
+            try:
+                idx = interval_names.index(cron_interval)
+                user_settings = models.Settings.objects.filter(interval=nyt_settings.INTERVALS[idx][0])
+                if user_settings:
+                    self.send_mails(connection, user_settings)
+                return
+            except ValueError:
+                print("Invalid cron interval - no match for %s" % cron_interval)
+                sys.exit()
 
         if not daemon:
             print("Entering send-loop, CTRL+C to exit")
@@ -267,6 +277,13 @@ class Command(BaseCommand):
                 send_emails=True,
                 latest__is_emailed=False
             ):
-                context['notifications'].append(subscription.latest)
+                for notification in models.Notification.objects.filter(
+                    subscription=subscription, user=None, is_emailed=False
+                ):
+                    context['notifications'].append(notification)
+                for notification in models.Notification.objects.filter(
+                    subscription=subscription, user=setting.user, is_emailed=False
+                ):
+                    context['notifications'].append(notification)
 
             self._send_batch(context, connection, setting)
