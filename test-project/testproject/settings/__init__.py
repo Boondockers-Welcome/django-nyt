@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
+import os
 from os import path as os_path
+
+from django import VERSION
+
 PROJECT_PATH = os_path.abspath(os_path.split(os_path.dirname(__file__))[0])
 
 DEBUG = True
@@ -70,7 +70,7 @@ ROOT_URLCONF = 'testproject.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'testproject.wsgi.application'
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -95,7 +95,6 @@ INSTALLED_APPS = [
     'testapp',
 ]
 
-from django import VERSION
 if VERSION <= (1, 6):
     INSTALLED_APPS.append('south')
     SOUTH_MIGRATION_MODULES = {
@@ -105,7 +104,6 @@ else:
     TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 
-import os
 
 LOGGING = {
     'version': 1,
@@ -156,6 +154,3 @@ if _enable_channels:
 
 
 NYT_ENABLE_ADMIN = True
-
-
-

@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 import os
 import sys
+
 from django.conf import settings
+from django.core.management import execute_from_command_line
 
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.admin',
+    'django.contrib.messages',
     'django.contrib.humanize',
     'django.contrib.sites',
     'django_nyt',
@@ -47,7 +50,7 @@ settings.configure(
     ],
     USE_TZ=True,
     SOUTH_TESTS_MIGRATE=True,
-    MIDDLEWARE_CLASSES=[
+    MIDDLEWARE=[
         'django.middleware.common.CommonMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
@@ -57,7 +60,6 @@ settings.configure(
 )
 
 
-from django.core.management import execute_from_command_line
 argv = [sys.argv[0], "test"]
 
 if len(sys.argv) == 1:

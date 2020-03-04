@@ -1,10 +1,7 @@
-from __future__ import absolute_import
-from __future__ import unicode_literals
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.test.utils import override_settings
-
-from django_nyt import utils, models
+from django_nyt import models, utils
 
 User = get_user_model()
 
