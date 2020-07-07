@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
-from django.conf.urls import url
+try:
+    from django.urls import include, re_path as url
+except ImportError:
+    from django.conf.urls import include, url
 
 from . import views
 

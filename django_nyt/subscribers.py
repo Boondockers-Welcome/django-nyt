@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 import logging
 
 from channels import Group
 
-from . import settings
-from . import models
+from . import models, settings
 
 logger = logging.getLogger(__name__)
 

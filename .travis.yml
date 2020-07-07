@@ -1,35 +1,65 @@
-# Because Python 3.6 is available on GCE
-dist: trusty
+cache: pip
 
 language: python
 
-python:
-  - "2.7"
-  - "3.4"
-  - "3.5"
-  - "3.6"
-
-env:
-  - LINT="yes"
-  - DJANGO="1.8"
-  - DJANGO="1.9"
-  - DJANGO="1.10"
-  - DJANGO="1.11"
-
 matrix:
-  exclude:
-  - python: "3.4"
-    env: LINT="yes"
-  - python: "3.5"
-    env: LINT="yes"
-  - python: "3.6"
-    env: LINT="yes"
-  - python: "3.6"
-    env: DJANGO="1.8"
-  - python: "3.6"
-    env: DJANGO="1.9"
-  - python: "3.6"
-    env: DJANGO="1.10"
+  include:
+  - python: 3.5
+    dist: xenial
+    sudo: false
+    env: DJANGO="2.1"
+  - python: 3.5
+    dist: xenial
+    sudo: false
+    env: DJANGO="2.2"
+
+  - python: 3.6
+    dist: xenial
+    sudo: false
+    env: DJANGO="2.1"
+  - python: 3.6
+    dist: xenial
+    sudo: false
+    env: DJANGO="2.2"
+  - python: 3.6
+    dist: xenial
+    sudo: false
+    env: DJANGO="3.0"
+
+  - python: 3.7
+    dist: xenial
+    sudo: false
+    env: DJANGO="2.1"
+  - python: 3.7
+    dist: xenial
+    sudo: true
+    env: DJANGO="2.2"
+  - python: 3.7
+    dist: xenial
+    sudo: true
+    env: DJANGO="3.0"
+
+  - python: 3.8
+    dist: xenial
+    sudo: false
+    env: DJANGO="2.1"
+  - python: 3.8
+    dist: bionic
+    sudo: true
+    env: DJANGO="2.2"
+  - python: 3.8
+    dist: bionic
+    sudo: true
+    env: DJANGO="3.0"
+
+  - python: pypy
+    dist: trusty
+    sudo: false
+    env: DJANGO="2.2"
+  - python: pypy
+    dist: trusty
+    sudo: false
+    env: DJANGO="3.0"
 
 install:
   - pip install tox tox-travis coverage codecov
@@ -39,7 +69,7 @@ script:
 
 notifications:
     irc:
-        - "irc.freenode.org#django-wiki"
+    - "irc.freenode.org#django-wiki"
 
 after_success:
   - coverage combine

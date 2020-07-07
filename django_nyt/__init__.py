@@ -1,16 +1,5 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 _disable_notifications = False
 
-VERSION = "1.0b5"
-__version__ = VERSION
+__version__ = "1.1.5"
 
-
-def notify(*args, **kwargs):
-    """
-    DEPRECATED - please access django_nyt.utils.notify
-    """
-    from django_nyt.utils import notify
-    return notify(*args, **kwargs)
+default_app_config = "django_nyt.apps.DjangoNytConfig"

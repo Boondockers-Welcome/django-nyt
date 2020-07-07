@@ -1,32 +1,23 @@
-# -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import unicode_literals
+from setuptools import find_packages
+from setuptools import setup
 
-import os
-from django_nyt import VERSION
-from setuptools import setup, find_packages
+from django_nyt import __version__
 
-def get_path(fname):
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), fname)
-
-def read(fname):
-    return open(get_path(fname)).read()
 
 packages = find_packages()
 
 setup(
     name="django-nyt",
-    version=VERSION,
+    version=__version__,
     author="Benjamin Bach",
     author_email="benjamin@overtag.dk",
     url="https://github.com/benjaoming/django-nyt",
     description="A pluggable notification system written for the Django framework.",
     license="Apache License 2.0",
     keywords=["django", "notification" "alerts"],
-    packages=find_packages(exclude=["testproject", "testproject.*"]),
+    packages=find_packages(),
     zip_safe=False,
-    install_requires=read('requirements.txt').split("\n"),
+    install_requires=["django>=1.11,<3.1"],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
@@ -37,9 +28,12 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development',
         'Topic :: Software Development :: Libraries :: Application Frameworks',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3 :: Only',
     ],
     include_package_data=True,
 )

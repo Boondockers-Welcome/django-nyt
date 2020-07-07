@@ -1,5 +1,3 @@
-from __future__ import absolute_import, print_function, unicode_literals
-
 import logging
 import os
 import smtplib
@@ -12,10 +10,12 @@ from django.contrib.sites.models import Site
 from django.core import mail
 from django.core.management.base import BaseCommand
 from django.template.loader import render_to_string
-from django.utils.translation import ugettext as _
-from django.utils.translation import activate, deactivate
-from django_nyt import settings as nyt_settings
+from django.utils.translation import activate
+from django.utils.translation import deactivate
+from django.utils.translation import gettext as _
+
 from django_nyt import models
+from django_nyt import settings as nyt_settings
 
 # Daemon / mail loop sleep between each database poll (seconds)
 SLEEP_TIME = 120
@@ -91,9 +91,8 @@ class Command(BaseCommand):
             if fpid > 0:
                 # Running as daemon now. PID is fpid
                 self.logger.info("PID: %s" % str(fpid))
-                pid_file = open(self.options['pid'], "w")
-                pid_file.write(str(fpid))
-                pid_file.close()
+                with open(self.options['pid'], "w") as pid_file:
+                    pid_file.write(str(fpid))
                 if not self.options['no_sys_exit']:
                     sys.exit(0)
         except OSError as e:
@@ -142,11 +141,7 @@ class Command(BaseCommand):
             self._daemonize()
 
         # create a connection to smtp server for reuse
-        try:
-            connection = mail.get_connection()
-        except:
-            self.logger.error("Could get a mail connection")
-            raise
+        connection = mail.get_connection()
 
         if cron_interval:
             interval_names = [y[1] for y in nyt_settings.INTERVALS]
@@ -184,10 +179,8 @@ class Command(BaseCommand):
             if last_sent:
                 user_settings = models.Settings.objects.filter(
                     interval__lte=(
-                        (started_sending_at -
-                         last_sent).seconds //
-                        60) //
-                    60).order_by('user')
+                        (started_sending_at - last_sent).seconds // 60) // 60
+                ).order_by('user')
             else:
                 user_settings = None
 
@@ -248,7 +241,7 @@ class Command(BaseCommand):
                         "Unhandled exception while sending, giving "
                         "up: {}"
                     ).format(e))
-                break
+                raise
 
     def send_mails(self, connection, last_sent=None, user_settings=None):
         """
@@ -258,11 +251,7 @@ class Command(BaseCommand):
 
         self.logger.debug("Entering send_mails()")
 
-        try:
-            connection.open()
-        except:
-            self.logger.error("Could not use e-mail connection")
-            raise
+        connection.open()
 
         if not user_settings:
             user_settings = models.Settings.objects.all().order_by('user')

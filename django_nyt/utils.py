@@ -1,12 +1,7 @@
-from __future__ import absolute_import
-from __future__ import unicode_literals
-
 from django.db.models import Model
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
-from . import _disable_notifications
-from . import models
-from . import settings
+from . import _disable_notifications, models, settings
 
 
 def notify(message, key, target_object=None, url=None, filter_exclude={}, recipient_users=None):
