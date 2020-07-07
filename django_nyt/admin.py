@@ -14,7 +14,7 @@ class SettingsAdmin(admin.ModelAdmin):
 
 
 class SubscriptionAdmin(admin.ModelAdmin):
-    raw_id_fields = ('settings',)
+    raw_id_fields = ('settings', 'latest')
     list_display = ('display_user', 'notification_type', 'display_interval',)
     search_fields = ['settings__user__username']
 
@@ -30,6 +30,12 @@ class SubscriptionAdmin(admin.ModelAdmin):
 class NotificationAdmin(admin.ModelAdmin):
 
     raw_id_fields = ('user', 'subscription')
+    list_display = ('user', 'created', 'display_type', 'is_viewed', 'message')
+    search_fields = ['user__username__iexact']
+
+    def display_type(self, instance):
+        return instance.subscription.notification_type
+    display_type.short_description = _("type")
 
 
 if settings.ENABLE_ADMIN:
